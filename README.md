@@ -19,7 +19,7 @@ Complete tasks, earn points, and win a free dinner at the end of the month!
 - **Profile page** – change display name, color and password
 - **Version badge** – always visible in the navbar
 
-![Admin Oanel](screenshits/adminpanel.png)
+![Admin Oanel](screenshots/adminpanel.png)
 ![Tasks](screenshots/tasks.png)
 ![Archive](screenshots/archive.png)
 
