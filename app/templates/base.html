@@ -21,7 +21,7 @@
             padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between;
             height: 58px; position: sticky; top: 0; z-index: 100; }
         .nav-brand { font-weight: 800; font-size: 1.15rem; text-decoration: none;
-            color: var(--text); display: flex; align-items: center; gap: 0.4rem; }
+            color: var(--text); display: flex; align-items: center; gap: 0; }
         .nav-brand span { color: var(--accent); }
         .nav-links { display: flex; gap: 0.2rem; align-items: center; }
         .nav-links a { color: var(--muted); text-decoration: none; padding: 0.4rem 0.75rem;
@@ -37,7 +37,10 @@
         .container { max-width: 980px; margin: 0 auto; padding: 1.5rem; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         @media (max-width: 620px) { .grid-2 { grid-template-columns: 1fr; }
-            nav { padding: 0 1rem; } .nav-links a span.label { display: none; } }
+            nav { padding: 0 1rem; } .nav-links a span.label { display: none; }
+            table { font-size: 0.78rem; }
+            td, th { padding: 0.4rem 0.4rem; }
+            .btn-sm { padding: 0.2rem 0.4rem; font-size: 0.72rem; } }
 
         /* Cards */
         .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1.25rem; }
@@ -113,7 +116,8 @@
         .modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
 
         /* Tables */
-        table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 400px; }
         th { text-align: left; padding: 0.5rem 0.75rem; color: var(--muted); font-weight: 600;
             font-size: 0.72rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
@@ -136,7 +140,7 @@
 <body>
 {% if current_user %}
 <nav>
-    <a href="/" class="nav-brand">⚔️ Chore<span>Wars</span> <span class="version-badge">v2.0</span></a>
+    <a href="/" class="nav-brand">⚔️ Chori<span>val</span> <span class="version-badge">v2.0</span></a>
     <div class="nav-links">
         <a href="/" {% if request.url.path == '/' %}class="active"{% endif %}>
             <span>🏆</span><span class="label"> Leaderboard</span>

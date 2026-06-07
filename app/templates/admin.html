@@ -12,7 +12,7 @@
 {% if pending %}
 <div class="card" style="margin-bottom:1.25rem; border-color: rgba(245,158,11,.4);">
     <div class="card-title">⏳ Pending task suggestions ({{ pending|length }})</div>
-    <table>
+    <div class="table-wrap"><table>
         <thead><tr><th>Icon</th><th>Name</th><th>Points</th><th>Suggested by</th><th>Actions</th></tr></thead>
         <tbody>
         {% for task in pending %}
@@ -32,7 +32,7 @@
         </tr>
         {% endfor %}
         </tbody>
-    </table>
+    </table></div>
 </div>
 {% endif %}
 
@@ -44,7 +44,7 @@
     </form>
     {% set active_invites = invitations | selectattr('used', 'eq', false) | list %}
     {% if active_invites %}
-    <table>
+    <div class="table-wrap"><table>
         <thead><tr><th>Link</th><th>Expires</th><th>Actions</th></tr></thead>
         <tbody>
         {% for inv in active_invites %}
@@ -63,7 +63,7 @@
         </tr>
         {% endfor %}
         </tbody>
-    </table>
+    </table></div>
     {% else %}
     <div style="color:var(--muted); font-size:0.875rem;">No active invite links.</div>
     {% endif %}
@@ -72,7 +72,8 @@
 <!-- Users -->
 <div class="card" style="margin-bottom:1.25rem;">
     <div class="card-title">Members ({{ users|length }})</div>
-    <table>
+    <div style="overflow-x:auto;">
+    <div class="table-wrap"><table>
         <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>
         {% for u in users %}
@@ -106,7 +107,8 @@
         </tr>
         {% endfor %}
         </tbody>
-    </table>
+    </table></div>
+    </div>
 </div>
 
 <!-- Tasks -->
@@ -124,7 +126,8 @@
 
 <div class="card">
     <div class="card-title">Manage tasks</div>
-    <table>
+    <div style="overflow-x:auto;">
+    <div class="table-wrap"><table>
         <thead><tr><th>Icon</th><th>Name</th><th>Pts</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>
         {% for task in tasks if task.status == 'approved' %}
@@ -147,7 +150,8 @@
         </tr>
         {% endfor %}
         </tbody>
-    </table>
+    </table></div>
+    </div>
 </div>
 
 <!-- Edit task modal -->
