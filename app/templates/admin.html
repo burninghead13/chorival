@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}Admin – Chorival{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>⚙️ Admin Panel</h1>
+    <p>Manage users, tasks and invitations</p>
+</div>
+
+<!-- Pending tasks -->
+{% set pending = tasks | selectattr('status', 'eq', 'pending') | list %}
+{% if pending %}
+<div class="card" style="margin-bottom:1.25rem; border-color: rgba(245,158,11,.4);">
+    <div class="card-title">⏳ Pending task suggestions ({{ pending|length }})</div>
+    <table>
+        <thead><tr><th>Icon</th><th>Name</th><th>Points</th><th>Suggested by</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for task in pending %}
+        <tr>
+            <td style="font-size:1.1rem;">{{ task.icon }}</td>
+            <td>{{ task.name }}</td>
+            <td><strong style="color:var(--accent)">{{ task.points }}</strong></td>
+            <td style="color:var(--muted)">{{ task.suggested_by_user.display_name if task.suggested_by_user else '–' }}</td>
+            <td style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                <form method="POST" action="/admin/task/approve/{{ task.id }}" style="display:inline;">
+                    <button type="submit" class="btn btn-success btn-sm">✓ Approve</button>
+                </form>
+                <form method="POST" action="/admin/task/reject/{{ task.id }}" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">✕ Reject</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Invitations -->
+<div class="card" style="margin-bottom:1.25rem;">
+    <div class="card-title">Invite new members</div>
+    <form method="POST" action="/admin/invite/create" style="margin-bottom:1rem;">
+        <button type="submit" class="btn btn-primary">🔗 Generate invite link</button>
+    </form>
+    {% set active_invites = invitations | selectattr('used', 'eq', false) | list %}
+    {% if active_invites %}
+    <table>
+        <thead><tr><th>Link</th><th>Expires</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for inv in active_invites %}
+        <tr>
+            <td>
+                <input type="text" value="{{ base_url }}/register/{{ inv.token }}"
+                       onclick="this.select(); document.execCommand('copy'); this.value='✓ Copied!';"
+                       style="font-size:0.75rem; cursor:pointer; width:100%;" readonly>
+            </td>
+            <td style="color:var(--muted); font-size:0.8rem; white-space:nowrap;">{{ inv.expires_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <form method="POST" action="/admin/invite/delete/{{ inv.id }}" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="color:var(--muted); font-size:0.875rem;">No active invite links.</div>
+    {% endif %}
+</div>
+
+<!-- Users -->
+<div class="card" style="margin-bottom:1.25rem;">
+    <div class="card-title">Members ({{ users|length }})</div>
+    <table>
+        <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for u in users %}
+        <tr>
+            <td>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <div class="avatar-sm" style="background:{{ u.color }}; width:30px; height:30px; font-size:0.75rem;">
+                        {{ u.display_name[0].upper() }}
+                    </div>
+                    <div>
+                        <div style="font-weight:500;">{{ u.display_name }}</div>
+                        <div style="color:var(--muted); font-size:0.75rem;">@{{ u.username }}</div>
+                    </div>
+                </div>
+            </td>
+            <td><span class="tag {% if u.role == 'admin' %}tag-yellow{% else %}tag-gray{% endif %}">{{ u.role }}</span></td>
+            <td><span class="tag {% if u.is_active %}tag-green{% else %}tag-red{% endif %}">
+                {{ 'active' if u.is_active else 'inactive' }}</span></td>
+            <td>
+                <button class="btn btn-ghost btn-sm"
+                        onclick="openUserEdit({{ u.id }}, '{{ u.display_name }}', '{{ u.color }}', '{{ u.role }}')">
+                    Edit
+                </button>
+                {% if u.id != current_user.id and u.is_active %}
+                <form method="POST" action="/admin/user/deactivate/{{ u.id }}" style="display:inline;"
+                      onsubmit="return confirm('Deactivate {{ u.display_name }}?')">
+                    <button type="submit" class="btn btn-danger btn-sm">Deactivate</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Tasks -->
+<div class="card" style="margin-bottom:1.25rem;">
+    <div class="card-title">Add task</div>
+    <form method="POST" action="/admin/task/add">
+        <div style="display:grid; grid-template-columns:2fr 1fr 60px auto; gap:0.5rem; align-items:end;">
+            <div><label>Name</label><input type="text" name="name" placeholder="e.g. Clean windows" required></div>
+            <div><label>Points</label><input type="number" name="points" value="2" min="1" max="99"></div>
+            <div><label>Icon</label><input type="text" name="icon" value="🏠" maxlength="4"></div>
+            <div><label>&nbsp;</label><button type="submit" class="btn btn-primary">+ Add</button></div>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-title">Manage tasks</div>
+    <table>
+        <thead><tr><th>Icon</th><th>Name</th><th>Pts</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for task in tasks if task.status == 'approved' %}
+        <tr>
+            <td style="font-size:1.1rem;">{{ task.icon }}</td>
+            <td>{{ task.name }}</td>
+            <td><strong style="color:var(--accent)">{{ task.points }}</strong></td>
+            <td><span class="tag {% if task.active %}tag-green{% else %}tag-gray{% endif %}">
+                {{ 'active' if task.active else 'inactive' }}</span></td>
+            <td>
+                <button class="btn btn-ghost btn-sm"
+                        onclick="openTaskEdit({{ task.id }}, '{{ task.name | replace("'", "\\'") }}', {{ task.points }}, '{{ task.icon }}', {{ task.active | lower }})">
+                    Edit
+                </button>
+                <form method="POST" action="/admin/task/delete/{{ task.id }}" style="display:inline;"
+                      onsubmit="return confirm('Delete this task?')">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Edit task modal -->
+<div class="modal-overlay" id="task-modal">
+    <div class="modal">
+        <h3>Edit task</h3>
+        <form method="POST" id="task-form">
+            <div class="form-group"><label>Name</label><input type="text" name="name" id="t-name" required></div>
+            <div style="display:grid; grid-template-columns:1fr 80px; gap:0.5rem;">
+                <div class="form-group"><label>Points</label><input type="number" name="points" id="t-points" min="1" max="99"></div>
+                <div class="form-group"><label>Icon</label><input type="text" name="icon" id="t-icon" maxlength="4"></div>
+            </div>
+            <div class="form-group">
+                <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                    <input type="checkbox" name="active" id="t-active" style="width:auto;"> Active
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModals()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit user modal -->
+<div class="modal-overlay" id="user-modal">
+    <div class="modal">
+        <h3>Edit member</h3>
+        <form method="POST" id="user-form">
+            <div class="form-group"><label>Display name</label><input type="text" name="display_name" id="u-name" required></div>
+            <div class="form-group"><label>Color</label><input type="color" name="color" id="u-color" style="height:38px; cursor:pointer; padding:2px 4px;"></div>
+            <div class="form-group">
+                <label>Role</label>
+                <select name="role" id="u-role">
+                    <option value="member">Member</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModals()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function closeModals() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+}
+function openTaskEdit(id, name, points, icon, active) {
+    document.getElementById('task-form').action = '/admin/task/edit/' + id;
+    document.getElementById('t-name').value = name;
+    document.getElementById('t-points').value = points;
+    document.getElementById('t-icon').value = icon;
+    document.getElementById('t-active').checked = active;
+    document.getElementById('task-modal').classList.add('open');
+}
+function openUserEdit(id, name, color, role) {
+    document.getElementById('user-form').action = '/admin/user/edit/' + id;
+    document.getElementById('u-name').value = name;
+    document.getElementById('u-color').value = color;
+    document.getElementById('u-role').value = role;
+    document.getElementById('user-modal').classList.add('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) closeModals(); });
+});
+</script>
+{% endblock %}

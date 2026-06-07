@@ -1,0 +1,18 @@
+services:
+  chorival:
+    build: .
+    container_name: chorival
+    restart: unless-stopped
+    ports:
+      - "8096:8000"
+    volumes:
+      - chorival-data:/data
+    environment:
+      - DB_PATH=/data/chorival.db
+      - SECRET_KEY=changeme-use-openssl-rand-hex-32
+      - ADMIN_USERNAME=admin
+      - ADMIN_DISPLAY_NAME=Admin
+      - ADMIN_PASSWORD=changeme
+
+volumes:
+  chorival-data:

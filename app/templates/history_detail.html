@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ label }} – Chorival{% endblock %}
+{% block content %}
+<div class="page-header">
+    <a href="/history" style="color:var(--muted); text-decoration:none; font-size:0.875rem;">← Back</a>
+    <h1 style="margin-top:0.25rem;">{{ label }}</h1>
+</div>
+<div class="grid-2" style="margin-bottom:1.25rem;">
+    {% for u in users %}
+    {% set pts = scores[u.id] %}
+    <div class="score-card {% if pts == max_score and pts > 0 %}winner{% endif %}">
+        {% if pts == max_score and pts > 0 %}<div class="crown">👑</div>{% endif %}
+        <div class="score-avatar" style="background:{{ u.color }}">{{ u.display_name[0].upper() }}</div>
+        <div class="score-name">{{ u.display_name }}</div>
+        <div class="score-pts" style="color:{{ u.color }}">{{ pts }}</div>
+        <div class="score-label">total points</div>
+    </div>
+    {% endfor %}
+</div>
+<div class="card">
+    <div class="card-title">All entries</div>
+    {% if entries %}
+    {% for e in entries %}
+    <div class="feed-item">
+        <div class="feed-dot" style="background:{{ e.user.color }}">{{ e.task.icon }}</div>
+        <div class="feed-body">
+            <div class="feed-main"><strong>{{ e.user.display_name }}</strong> – {{ e.task.name }}</div>
+            <div class="feed-meta">{{ e.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+        </div>
+        <div class="feed-pts">+{{ e.points }}</div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="text-align:center; padding:2rem; color:var(--muted);">No entries for this month.</div>
+    {% endif %}
+</div>
+{% endblock %}
