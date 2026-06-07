@@ -3,6 +3,8 @@
 A self-hosted web app for a monthly household chores competition.  
 Complete tasks, earn points, and win a free dinner at the end of the month!
 
+![Dashboard](screenshots/dashboard.png)
+
 ---
 
 ## Features
@@ -16,6 +18,10 @@ Complete tasks, earn points, and win a free dinner at the end of the month!
 - **Monthly archive** – all past competitions with results
 - **Profile page** – change display name, color and password
 - **Version badge** – always visible in the navbar
+
+![Admin Oanel](screenshits/adminpanel.png)
+![Tasks](screenshots/tasks.png)
+![Archive](screenshots/archive.png)
 
 ---
 
